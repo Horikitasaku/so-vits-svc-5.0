@@ -1,4 +1,5 @@
-import sys,os
+import sys, os
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
 import librosa
@@ -12,10 +13,15 @@ def compute_f0(filename, save, device):
     audio, sr = librosa.load(filename, sr=16000)
     assert sr == 16000
     # Load audio
-    audio = torch.tensor(np.copy(audio))[None]
-    audio = audio + torch.randn_like(audio) * 0.001
+    audio = librosa.effects.preemphasis(audio, coef=0.97) # using preemphasis instead of random noise
+    audio = torch.tensor(audio)[None]
+    audio = audio + torch.randn_like(audio) * 0.0005
+    # Split audio into non-silent intervals
+    intervals = librosa.effects.split(audio.numpy(), top_db=30)
+    audio = torch.cat([audio[:, start:end] for start, end in intervals], dim=1)
+    
     # Here we'll use a 10 millisecond hop length
-    hop_length = 160
+    hop_length = 80
     # Provide a sensible frequency range for your domain (upper limit is 2006 Hz)
     # This would be a reasonable range for speech
     fmin = 50
@@ -37,8 +43,8 @@ def compute_f0(filename, save, device):
         return_periodicity=True,
     )
     # CREPE was not trained on silent audio. some error on silent need filter.pitPath
-    periodicity = crepe.filter.median(periodicity, 7)
-    pitch = crepe.filter.mean(pitch, 5)
+    periodicity = crepe.filter.median(periodicity, 5) # shorter window for median filter
+    pitch = crepe.filter.mean(pitch, 3) # shorter window for mean filter
     pitch[periodicity < 0.5] = 0
     pitch = pitch.squeeze(0)
     np.save(save, pitch, allow_pickle=False)
@@ -64,6 +70,10 @@ if __name__ == "__main__":
             os.makedirs(f"./{pitPath}/{spks}", exist_ok=True)
 
             files = [f for f in os.listdir(f"./{wavPath}/{spks}") if f.endswith(".wav")]
-            for file in tqdm(files, desc=f'Processing crepe {spks}'):
+            for file in tqdm(files, desc=f"Processing crepe {spks}"):
                 file = file[:-4]
-                compute_f0(f"{wavPath}/{spks}/{file}.wav", f"{pitPath}/{spks}/{file}.pit", device)
+                compute_f0(
+                    f"{wavPath}/{spks}/{file}.wav",
+                    f"{pitPath}/{spks}/{file}.pit",
+                    device,
+                )
