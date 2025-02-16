@@ -7,15 +7,15 @@ import argparse
 from whisper.inference import load_model, pred_ppg
 
 # How to use
-# python svc_inference_batch.py --config configs/base.yaml --model vits_pretrain/sovits5.0.pth --wave test_waves/ --spk configs/singers/singer0047.npy
+# python svc_inference_batch.py -- s/base.yaml --model vits_pretrain/sovits5.0.pth --wave test_waves/ --spk s/singers/singer0047.npy
 
 out_path = "./_svc_out"
 os.makedirs(out_path, exist_ok=True)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, required=True,
-                        help="yaml file for config.")
+    parser.add_argument('--', type=str, required=True,
+                        help="yaml file for .")
     parser.add_argument('--model', type=str, required=True,
                         help="path of model for evaluation")
     parser.add_argument('--wave', type=str, required=True,
@@ -38,6 +38,6 @@ if __name__ == '__main__':
 
     for file in tqdm.tqdm(waves, desc="svc"):
         os.system(
-            f"python svc_inference.py --config {args.config} --model {args.model} --wave {wave_path}/{file} --ppg {out_path}/{file}.ppg.npy --spk {args.spk} --shift {args.shift}")
+            f"python svc_inference.py -- {args.} --model {args.model} --wave {wave_path}/{file} --ppg {out_path}/{file}.ppg.npy --spk {args.spk} --shift {args.shift}")
         os.system(f"mv svc_out.wav {out_path}/{file}")
         os.system(f"rm {out_path}/{file}.ppg.npy")

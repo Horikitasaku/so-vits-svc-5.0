@@ -123,8 +123,12 @@ def train(rank, args, chkpt_path, hp, hp_str):
         checkpoint = torch.load(chkpt_path, map_location='cpu')
         load_model(model_g, checkpoint['model_g'])
         load_model(model_d, checkpoint['model_d'])
-        optim_g.load_state_dict(checkpoint['optim_g'])
-        optim_d.load_state_dict(checkpoint['optim_d'])
+        if hp.train.load_optim:
+            logger.info("Load optim")
+            optim_g.load_state_dict(checkpoint['optim_g'])
+            optim_d.load_state_dict(checkpoint['optim_d'])
+        else:
+            logger.info("use config lr")
         init_epoch = checkpoint['epoch']
         step = checkpoint['step']
 
@@ -143,8 +147,12 @@ def train(rank, args, chkpt_path, hp, hp_str):
     # if not consistent, it'll horribly slow down.
     torch.backends.cudnn.benchmark = True
 
-    scheduler_g = torch.optim.lr_scheduler.ExponentialLR(optim_g, gamma=hp.train.lr_decay, last_epoch=init_epoch-2)
-    scheduler_d = torch.optim.lr_scheduler.ExponentialLR(optim_d, gamma=hp.train.lr_decay, last_epoch=init_epoch-2)
+    scheduler_g = torch.optim.lr_scheduler.ExponentialLR(optim_g, gamma=hp.train.lr_decay
+                                                        #  , last_epoch=init_epoch-2
+                                                         )
+    scheduler_d = torch.optim.lr_scheduler.ExponentialLR(optim_d, gamma=hp.train.lr_decay
+                                                        #  , last_epoch=init_epoch-2
+                                                         )
 
     stft_criterion = MultiResolutionSTFTLoss(device, eval(hp.mrd.resolutions))
     spkc_criterion = nn.CosineEmbeddingLoss()
@@ -255,10 +263,10 @@ def train(rank, args, chkpt_path, hp, hp_str):
             loss_k = loss_kl_f.item()
             loss_r = loss_kl_r.item()
             loss_i = spk_loss.item()
-
+            current_lr = scheduler_g.get_last_lr()[0]
             if rank == 0 and step % hp.log.info_interval == 0:
                 writer.log_training(
-                    loss_g, loss_d, loss_m, loss_s, loss_k, loss_r, score_loss.item(), step)
+                    loss_g, loss_d, loss_m, loss_s, loss_k, loss_r, score_loss.item(), step, current_lr)
                 logger.info("epoch %d | g %.04f m %.04f s %.04f d %.04f k %.04f r %.04f i %.04f | step %d" % (
                     epoch, loss_g, loss_m, loss_s, loss_d, loss_k, loss_r, loss_i, step))
 

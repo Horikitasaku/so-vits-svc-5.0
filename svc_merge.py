@@ -15,14 +15,24 @@ def save_model(state_dict, checkpoint_path):
     torch.save({'model_g': state_dict}, checkpoint_path)
 
 
-def average_model(model_list):
+def average_model(model_list, weights=None):
+    if weights is None:
+        weights = [1.0] * len(model_list)  # Default equal weights if not provided
+    
+    if len(model_list) != len(weights):
+        raise ValueError("Number of models and weights must be the same.")
+    
     model_keys = list(model_list[0].keys())
     model_average = collections.OrderedDict()
+    
+    total_weight = sum(weights)
+    
     for key in model_keys:
         key_sum = 0
-        for i in range(len(model_list)):
-            key_sum = (key_sum + model_list[i][key])
-        model_average[key] = torch.div(key_sum, float(len(model_list)))
+        for i, model in enumerate(model_list):
+            key_sum += model[key] * (weights[i] / total_weight)
+        model_average[key] = key_sum
+    
     return model_average
 #   ss_list = []
 #   ss_list.append(s1)

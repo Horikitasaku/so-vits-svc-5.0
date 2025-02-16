@@ -178,3 +178,5 @@ pretrain/
 *.log.3
 .history/
 *data_svc/*
+*.index
+*.tar

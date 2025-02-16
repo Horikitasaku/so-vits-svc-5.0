@@ -3,8 +3,7 @@ import logging
 import math
 import time
 from pathlib import Path
-from typing import TypeVar, Generic, cast, Any
-
+from typing import TypeVar, Generic, cast, Any, List
 import numpy as np
 import numpy.typing as npt
 
@@ -56,6 +55,11 @@ class FaissRetrievableFeatureIndex(FaissFeatureIndex[Index], abc.ABC):
 
     def retriv(self, features: NumpyArray) -> NumpyArray:
         # use method search_and_reconstruct instead of recreating the whole matrix
+        # Before calling search_and_reconstruct
+        print("Shape of features:", features.shape)
+
+        self._index = faiss.IndexFlatL2(features.shape[-1])  # 如果需要，請調整維度
+
         scores, _, nearest_vectors = self._index.search_and_reconstruct(features, k=self._n_nearest)
         weighted_nearest_vectors = self._weight_nearest_vectors(nearest_vectors, scores)
         retriv_vector = (1 - self._ratio) * features + self._ratio * weighted_nearest_vectors
@@ -116,7 +120,7 @@ class FaissIVFTrainableFeatureIndex(FaissFeatureIndex[IndexIVF]):
     def _batch_count(self, feature_matrix: NumpyArray) -> int:
         return math.ceil(feature_matrix.shape[0] / self._batch_size)
 
-    def _split_matrix_by_batch(self, feature_matrix: NumpyArray) -> list[NumpyArray]:
+    def _split_matrix_by_batch(self, feature_matrix: NumpyArray) -> List[NumpyArray]:
         return np.array_split(feature_matrix, indices_or_sections=self._batch_count(feature_matrix), axis=0)
 
     def _train_index(self, train_feature_matrix: NumpyArray) -> None:

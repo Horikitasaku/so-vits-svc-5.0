@@ -90,6 +90,7 @@ def svc_infer(model, retrieval: IRetrieval, spk, pit, ppg, vec, hp, device):
         source = model.pitch2source(source)
         pitwav = model.source2wav(source)
         write("svc_out_pit.wav", hp.data.sampling_rate, pitwav)
+        print('pit?',pitwav.shape)
 
         hop_size = hp.data.hop_length
         all_frame = len_min
@@ -97,7 +98,7 @@ def svc_infer(model, retrieval: IRetrieval, spk, pit, ppg, vec, hp, device):
         out_chunk = 2500  # 25 S
         out_index = 0
         out_audio = []
-
+        print(all_frame)
         while (out_index < all_frame):
 
             if (out_index == 0):  # start frame
@@ -124,6 +125,8 @@ def svc_infer(model, retrieval: IRetrieval, spk, pit, ppg, vec, hp, device):
                              hop_size:cut_e * hop_size].to(device)
             sub_out = model.inference(
                 sub_ppg, sub_vec, sub_pit, spk, sub_len, sub_har)
+            print('inference?',sub_out.shape)
+            
             sub_out = sub_out[0, 0].data.cpu().detach().numpy()
 
             sub_out = sub_out[cut_s_out:cut_e_out]
@@ -131,6 +134,7 @@ def svc_infer(model, retrieval: IRetrieval, spk, pit, ppg, vec, hp, device):
             out_index = out_index + out_chunk
 
         out_audio = np.asarray(out_audio)
+        print('out?',out_audio.shape)
     return out_audio
 
 
@@ -166,6 +170,7 @@ def main(args):
         hp)
     load_svc_model(args.model, model)
     retrieval = create_retrival(args)
+    print(retrieval)
     model.eval()
     model.to(device)
 

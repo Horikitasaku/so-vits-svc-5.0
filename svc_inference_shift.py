@@ -31,7 +31,7 @@ def main(args):
         os.system(f"python pitch/inference.py -w {args.wave} -p {args.pit}")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    hp = OmegaConf.load(args.config)
+    hp = OmegaConf.load(args.)
     model = SynthesizerInfer(
         hp.data.filter_length // 2 + 1,
         hp.data.segment_size // hp.data.hop_length,
@@ -71,8 +71,8 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, required=True,
-                        help="yaml file for config.")
+    parser.add_argument('--', type=str, required=True,
+                        help="yaml file for .")
     parser.add_argument('--model', type=str, required=True,
                         help="path of model for evaluation")
     parser.add_argument('--wave', type=str, required=True,
