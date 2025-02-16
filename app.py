@@ -232,11 +232,17 @@ class WebUI:
     def refresh_model(self, model_name):
         self.script_dir = os.path.dirname(os.path.abspath(__file__))
         self.model_root = os.path.join(self.script_dir, f"chkpt/{model_name}")
+        self.models_root = os.path.join(self.script_dir, f"models/{model_name}")
+        print(self.models_root)
+        print(self.model_root)
         self.names = []
         try:
             for self.name in os.listdir(self.model_root):
                 if self.name.endswith(".pt"):
                     self.names.append(self.name)
+            for self.name in os.listdir(self.models_root):
+                if self.name.endswith(".pth"):
+                    self.names.append(os.path.join("models", self.name))
             return {"choices": sorted(self.names), "__type__": "update"}
         except FileNotFoundError:
             return {"label": i18n("缺少模型文件"), "__type__": "update"}
@@ -244,12 +250,18 @@ class WebUI:
     def refresh_model2(self, model_name):
         self.script_dir = os.path.dirname(os.path.abspath(__file__))
         self.model_root = os.path.join(self.script_dir, f"chkpt/{model_name}")
-        self.names2 = []
+        self.models_root = os.path.join(self.script_dir, f"models/{model_name}")
+        print(self.models_root)
+        print(self.model_root)
+        self.names = []
         try:
             for self.name in os.listdir(self.model_root):
                 if self.name.endswith(".pt"):
-                    self.names2.append(self.name)
-            return {"choices": sorted(self.names2), "__type__": "update"}
+                    self.names.append(self.name)
+            for self.name in os.listdir(self.models_root):
+                if self.name.endswith(".pth"):
+                    self.names.append(os.path.join("models", self.name))
+            return {"choices": sorted(self.names), "__type__": "update"}
         except FileNotFoundError:
             return {"label": i18n("缺少模型文件"), "__type__": "update"}
 
