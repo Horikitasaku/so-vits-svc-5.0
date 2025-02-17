@@ -16,7 +16,6 @@ The tree [RoFormer-HiFTNet](https://github.com/PlayVoice/whisper-vits-svc/tree/R
 No More Upgrade
 
 </div>
-
 - This project targets deep learning beginners, basic knowledge of Python and PyTorch are the prerequisites for this project;
 - This project aims to help deep learning beginners get rid of boring pure theoretical learning, and master the basic knowledge of deep learning by combining it with practices;
 - This project does not support real-time voice converting; (need to replace whisper if real-time voice converting is what you are looking for)

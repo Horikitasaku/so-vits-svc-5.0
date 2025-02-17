@@ -17,7 +17,7 @@ def load_model(path, device):
     model = hubert_model.hubert_soft(path)
     model.eval()
     if not (device == "cpu"):
-        model.half()
+        model
     model.to(device)
     return model
 
@@ -32,7 +32,7 @@ def pred_vec(model, wavPath, vecPath, device):
         feats = torch.from_numpy(feats).to(device)
         feats = feats[None, None, :]
         if not (device == "cpu"):
-            feats = feats.half()
+            feats = feats
         with torch.no_grad():
             vec = model.units(feats).squeeze().data.cpu().float().numpy()
             vec_a.extend(vec)
@@ -42,7 +42,7 @@ def pred_vec(model, wavPath, vecPath, device):
         feats = torch.from_numpy(feats).to(device)
         feats = feats[None, None, :]
         if not (device == "cpu"):
-            feats = feats.half()
+            feats = feats
         with torch.no_grad():
             vec = model.units(feats).squeeze().data.cpu().float().numpy()
             # print(vec.shape)   # [length, dim=256] hop=320

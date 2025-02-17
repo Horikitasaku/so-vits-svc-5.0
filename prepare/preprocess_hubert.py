@@ -17,7 +17,7 @@ def load_audio(file: str, sr: int = 16000):
 def load_model(path, device):
     model = hubert_model.hubert_soft(path)
     model.eval()
-    model.half()
+    model
     model.to(device)
     return model
 
@@ -25,7 +25,7 @@ def load_model(path, device):
 def pred_vec(model, wavPath, vecPath, device):
     feats = load_audio(wavPath)
     feats = torch.from_numpy(feats).to(device)
-    feats = feats[None, None, :].half()
+    feats = feats[None, None, :]
     with torch.no_grad():
         vec = model.units(feats).squeeze().data.cpu().float().numpy()
         # print(vec.shape)   # [length, dim=256] hop=320

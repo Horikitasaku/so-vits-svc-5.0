@@ -643,7 +643,7 @@ class DecodingTask:
 
     def _get_audio_features(self, mel: Tensor):
         if self.options.fp16:
-            mel = mel.half()
+            mel = mel
 
         if mel.shape[-2:] == (
             self.model.dims.n_audio_ctx,
